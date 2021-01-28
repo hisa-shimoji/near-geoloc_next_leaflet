@@ -1,18 +1,22 @@
-// import GeoView from '../components/geoview'
-import dynamic from "next/dynamic"
-const GeoView = dynamic(
-  () => import('../components/geoview'),
-    // .then(modules =>  modules.ClientOnlyComponent), 
-  {ssr: false}
-)
+import dynamic from "next/dynamic";
+const GeoView = dynamic(() => import("../components/geoview"), { ssr: false });
 
 const Map = () => {
-    return(
-        <>
-        <h3>hi!</h3>
-        <GeoView></GeoView>
-        </>
-    )
-}
+  return (
+    <>
+      <h3>hi!</h3>
+      <GeoView></GeoView>
+    </>
+  );
+};
+export default Map;
 
-export default Map
+// export async function getServerSideProps(context) {
+//   const { client } = await connectToDatabase();
+
+//   const isConnected = await client.isConnected();
+
+//   return {
+//     props: { isConnected },
+//   };
+// }
