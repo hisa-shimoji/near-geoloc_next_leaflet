@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import LoadingOverlay from "react-loading-overlay";
+
 import "leaflet/dist/leaflet.css";
 
 import Leaflet from "leaflet";
@@ -29,6 +31,7 @@ const GeoView = (props) => {
     lng: 139.76939931301777,
   });
   const [facilities, setFacilities] = useState([]);
+  const [isLoading, setisLoading] = useState(false);
 
   function LocationMarker() {
     useMapEvents({
@@ -39,7 +42,6 @@ const GeoView = (props) => {
 
     return (
       <>
-        {/* <Marker icon={pin_icon} position={position}></Marker> */}
         {facilities.map((f) => {
           return (
             <Marker
@@ -48,8 +50,6 @@ const GeoView = (props) => {
               position={[
                 f.coordinates[1],
                 f.coordinates[0],
-                // f.lat,
-                // f.lng,
               ]}
             >
               <Popup>{f.name}</Popup>
@@ -63,9 +63,12 @@ const GeoView = (props) => {
     );
   }
 
-  useEffect(() => {
+  useEffect(async() => {
     setFacilities([]);
-    axios
+
+    await setisLoading(true)
+    
+    await axios
       .post("/api/nearloc", {
         lat: position.lat,
         lng: position.lng,
@@ -74,24 +77,32 @@ const GeoView = (props) => {
       .then((results) => {
         setFacilities(results.data);
       });
+
+    setisLoading(false)
   }, [position]);
 
   return (
     <>
       {typeof window !== "undefined" ? (
-        <MapContainer
-          center={position}
-          zoom={13}
-          scrollWheelZoom={false}
-          style={{ height: "80vh" }}
+        <LoadingOverlay
+          active={isLoading}
+          spinner
+          text="Loading..."
         >
-          <TileLayer
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <Marker icon={pin_icon} position={position}></Marker>
-          <LocationMarker />
-        </MapContainer>
+          <MapContainer
+            center={position}
+            zoom={13}
+            scrollWheelZoom={false}
+            style={{ height: "80vh" }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker icon={pin_icon} position={position}></Marker>
+            <LocationMarker />
+          </MapContainer>
+        </LoadingOverlay>
       ) : null}
     </>
   );
